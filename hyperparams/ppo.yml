@@ -1,0 +1,128 @@
+atari:
+  env_wrapper:
+    - stable_baselines3.common.atari_wrappers.AtariWrapper
+  frame_stack: 4
+  policy: 'CnnPolicy'
+  n_envs: 8
+  n_steps: 128
+  n_epochs: 4
+  batch_size: 256
+  n_timesteps: !!float 1e7
+  learning_rate: lin_2.5e-4
+  clip_range: lin_0.1
+  vf_coef: 0.5
+  ent_coef: 0.01
+
+HalfCheetah-v3:
+  normalize: true
+  n_envs: 1
+  policy: 'MlpPolicy'
+  n_timesteps: !!float 1e6
+  batch_size: 64
+  n_steps: 512
+  gamma: 0.98
+  learning_rate: 2.0633e-05
+  ent_coef: 0.000401762
+  clip_range: 0.1
+  n_epochs: 20
+  gae_lambda: 0.92
+  max_grad_norm: 0.8
+  vf_coef: 0.58096
+  policy_kwargs: "dict(
+                    log_std_init=-2,
+                    ortho_init=False,
+                    activation_fn=nn.ReLU,
+                    net_arch=[dict(pi=[256, 256], vf=[256, 256])]
+                  )"
+  pref_learning:
+    active: true
+    human_critic:
+      maximum_segment_buffer: 1000000
+      maximum_preference_buffer: 2100
+      training_epochs: 10
+      batch_size: 128
+      hidden_sizes: [ 256, 256, 256 ]
+      traj_k_lenght: 50
+      weight_decay: 0.001
+      learning_rate: 0.0003
+      regularize: false
+      custom_oracle: false
+    wrapper:
+      - utils.wrappers.HumanReward:
+          human_critic: true
+    callback:
+      - pref.callbacks.UpdateRewardFunctionCriticalPoint:
+          human_critic: true
+          use_env_name: true
+          n_queries: 50
+          initial_reward_estimation_epochs: 200
+          reward_training_epochs: 50
+          truth: 90
+          traj_length: 50
+          smallest_rew_threshold: -0.3
+          largest_rew_threshold: 0.3
+          n_initial_queries: 400
+          max_queries: 1400
+          every_n_timestep: 20000
+
+Walker2d-v3:
+  normalize: true
+  n_envs: 1
+  policy: 'MlpPolicy'
+  n_timesteps: !!float 1e6
+  #n_timesteps: !!float 9e4
+  batch_size: 32
+  n_steps: 512
+  gamma: 0.99
+  learning_rate: 5.05041e-05
+  ent_coef: 0.000585045
+  clip_range: 0.1
+  n_epochs: 20
+  gae_lambda: 0.95
+  max_grad_norm: 1
+  vf_coef: 0.871923
+  pref_learning:
+    active: true
+    human_critic:
+      maximum_segment_buffer: 1000000
+      maximum_preference_buffer: 1400
+      training_epochs: 10
+      batch_size: 64
+      hidden_sizes: [ 256, 256, 256 ]
+      traj_k_lenght: 50
+      weight_decay: 0.0
+      learning_rate: 0.0003
+      regularize: false
+      custom_oracle: false
+      epsilon: 2
+    wrapper:
+      - utils.wrappers.HumanReward:
+          human_critic: true
+    callback:
+      - pref.callbacks.UpdateRewardFunctionCriticalPoint:
+          human_critic: true
+          use_env_name: true
+          n_queries: 50
+          initial_reward_estimation_epochs: 200
+          reward_training_epochs: 50
+          truth: 90
+          traj_length: 50
+          smallest_rew_threshold: -1
+          largest_rew_threshold: 1
+          n_initial_queries: 200
+          max_queries: 700
+          every_n_timestep: 20000
+
+
+Default:
+  n_envs: 10
+  n_timesteps: !!float 1e6
+  policy: 'MlpPolicy'
+  n_steps: 2014
+  gae_lambda: 0.95
+  gamma: 0.99
+  n_epochs: 10
+  ent_coef: 0.001
+  batch_size: 64
+  learning_rate: !!float 1e-4
+  clip_range: 0.2
